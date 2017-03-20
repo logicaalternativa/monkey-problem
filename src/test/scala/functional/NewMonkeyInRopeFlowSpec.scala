@@ -57,7 +57,7 @@ class NewMonkeyInRopeFlowSpec extends FlatSpec with Matchers with GivenWhenThen 
           mew.head should be ( secondMonkey )
           mwe should be ( setEmpty )
           t should be ( to )
-          n should be ( numMonkeysInRope)
+          n should be ( numMonkeysInRope + 1)
         case Failure( e ) => 
           fail( s"It must not be a error : ${e.getMessage}" )
      
@@ -68,7 +68,7 @@ class NewMonkeyInRopeFlowSpec extends FlatSpec with Matchers with GivenWhenThen 
   
   "2.- If the direction is to East and there are monkeys  waiting " +
   "to cross the canyon to East and there are also monkey waiting " +
-  "in the West and there is already monkeys in the rope"  should  " throw and " +
+  "in the West and there is already monkeys in the rope"  should  " throws and " +
   "validation error" in {
           
      Given("a flow and data whit monkeys waiting East side and any the West side")
@@ -98,8 +98,82 @@ class NewMonkeyInRopeFlowSpec extends FlatSpec with Matchers with GivenWhenThen 
     
   }
   
+  "3.- If the direction is to east and there are monkeys  waiting " +
+  "to cross the canyon to east and to the west side and there is " + 
+  "not any monkeys in the rope"  should  " change direction towest, " +
+  "sends a message from first monkey that is waiting in the west side and " + 
+  "remove from list waiting monkeys from this side" in {
+          
+     Given("a flow and data whit monkeys waiting East side and any the West side")
+    
+     val firstMonkey = Monkey( "1", East )   
+     val secondMonkey = Monkey( "2", East )      
+     val monkeyArrivedFlow = new NewMonkeyInRopeFlowImpTry( secondMonkey )
+    
+     val waitingEast = Set[Monkey]( firstMonkey )
+     val waitingWest = Set[Monkey]( secondMonkey )
+     val to = East
+     val numMonkeysInRope = 0
+     
+     val data = Data( waitingEast, waitingWest, to, numMonkeysInRope )   
+     
+     When("it is called to next")
+     val newData  = monkeyArrivedFlow.next( data )
+     
+     Then( "it should remove the first monkey waiting to cross from east to west" )      
+     newData match {
+        case Success( (isSentMessage, Data( mew, mwe, t, n) )) => 
+          isSentMessage should be ( true )
+          mew should be ( waitingEast )
+          mwe should be ( Set[Monkey]() )
+          t should be ( West )
+          n should be ( 1 )
+        case Failure( e ) => 
+          fail( s"It must not be a error : ${e.getMessage}" )
+     
+    }
+    
+  }
   
-  "3.- If the direction is to West and there are monkeys  waiting " +
+  "4.- If the direction is to west and there are monkeys  waiting " +
+  "to cross the canyon to east and to the west side and there is " + 
+  "not any monkeys in the rope"  should  " change direction to east, " +
+  "sends a message from first monkey that is waiting in the west side and " + 
+  "remove from list waiting monkeys from this side" in {
+          
+     Given("a flow and data whit monkeys waiting east side and any the West side")
+    
+     val firstMonkey = Monkey( "1", East )   
+     val secondMonkey = Monkey( "2", East )      
+     val monkeyArrivedFlow = new NewMonkeyInRopeFlowImpTry( firstMonkey )
+    
+     val waitingEast = Set[Monkey]( firstMonkey )
+     val waitingWest = Set[Monkey]( secondMonkey )
+     val to = West
+     val numMonkeysInRope = 0
+     
+     val data = Data( waitingEast, waitingWest, to, numMonkeysInRope )   
+     
+     When("it is called to next")
+     val newData  = monkeyArrivedFlow.next( data )
+     
+     Then( "it should remove the first monkey waiting to cross from east to west" )      
+     newData match {
+        case Success( (isSentMessage, Data( mew, mwe, t, n) )) => 
+          isSentMessage should be ( true )
+          mew should be ( Set[Monkey]())
+          mwe should be ( waitingWest )
+          t should be ( East )
+          n should be ( 1 )
+        case Failure( e ) => 
+          fail( s"It must not be a error : ${e.getMessage}" )
+     
+    }
+    
+  }
+  
+  
+  "5.- If the direction is to West and there are monkeys  waiting " +
   "to cross the canyon to East and there are also monkey waiting " +
   "in the West and there is already monkeys in the rope"  should  " throw and " +
   "validation error" in {
@@ -132,7 +206,7 @@ class NewMonkeyInRopeFlowSpec extends FlatSpec with Matchers with GivenWhenThen 
   }
    
     
-  "4.- If the direction is to West and there are monkeys waiting " +
+  "6.- If the direction is to West and there are monkeys waiting " +
   "to cross the canyon from west to east and there is not any monkey waiting " +
   "in the east side and there is already monkeys in the rope" should  "send " +
   "a message that to the first monkey that it is waiting in East and "+
@@ -160,7 +234,7 @@ class NewMonkeyInRopeFlowSpec extends FlatSpec with Matchers with GivenWhenThen 
           mew should be ( setEmpty )
           mwe.head should be ( secondMonkey )
           t should be ( to )
-          n should be ( numMonkeysInRope)
+          n should be ( numMonkeysInRope + 1 )
         case Failure( e ) => 
           fail( s"It must not be a error : ${e.getMessage}" )
      
