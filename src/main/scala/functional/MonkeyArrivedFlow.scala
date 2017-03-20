@@ -8,8 +8,8 @@ sealed trait Region
 case object East extends Region
 case object West extends Region
 
-case class Monkey(in : Region)
-case class Data( monkeysWaitingWest : Set[Monkey], monkeysWaitingEast : Set[Monkey], to : Region, numMonkeysInRope : Int )
+case class Monkey(id : String, in : Region)
+case class Data( waitingEastToWest : Set[Monkey], waitingWestToEast : Set[Monkey], to : Region, numMonkeysInRope : Int )
 
 trait MonkeyArrivedFlow [P[_]] {
   
