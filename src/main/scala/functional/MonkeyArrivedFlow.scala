@@ -9,7 +9,6 @@ trait MonkeyArrivedFlow [P[_]] {
   
   import scalaz.MonadError
   import scalaz.syntax.monadError._
-  import scalaz.syntax._
   
   implicit val E: MonadError[P,Error]
   

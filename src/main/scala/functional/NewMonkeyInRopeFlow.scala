@@ -2,16 +2,41 @@ package com.logicaalternativa.monkeyproblem
 package functional
 
 
-trait NewMonkeyInRopeFlow [P[_]] {
+object NewMonkeyInRopeFlow {
   
   import scalaz.MonadError
   import scalaz.syntax.monadError._
   
-  implicit val E: MonadError[P,Error]
+  def next[P[_]]( data : Data )( implicit ECC : ExecuteEventCanAcrossMonkey[P], ENM : ExecuteEventNewMonkeyInRope[P], E: MonadError[P,Error] ) : P[ (StateEvents,Data) ] =  {
+    
+    val waitingEastIsNotEmpty = data.waitingEastToWest.headOption.fold( false )( _ => true  )
+      
+    val waitingWestIsNotEmpty = data.waitingWestToEast.headOption.fold( false )( _ => true  )
+    
+    
+    if ( data.isEmpty ) {
+        
+      ( StateEvents( NotSent ), data ).pure
+      
+    } else if ( isNotEmptySetsOfBothSides( data ) && data.numMonkeysInRope > 0 ) {
+      
+      ENM.execEventNewMonkeyInRopeWhitDelay map (s => ( StateEvents( s ), data  )  ) 
+      
+    } else { 
+      
+      for {
+        
+        newData <- nextIfDataIsNotEmpty( data )
+        
+        stateEvent <- ENM.execEventNewMonkeyInRopeWhitDelay
+        
+      } yield ( StateEvents( stateEvent ), newData  )     
+      
+    } 
+      
+  }
   
-  def sendMessageCanAcross( monkey : Monkey ) : P[Unit]
-  
-  def next( data : Data ) : P[(Boolean, Data)] =  {
+  private def nextIfDataIsNotEmpty[P[_]]( data : Data )( implicit ECC : ExecuteEventCanAcrossMonkey[P],  ENM : ExecuteEventNewMonkeyInRope[P], E: MonadError[P,Error] )  :  P[ Data ] = {
     
     for {
       
@@ -22,69 +47,63 @@ trait NewMonkeyInRopeFlow [P[_]] {
               case West => data.waitingWestToEast.pure 
             } 
             
-      newSet <- sendMessageAndUpdateSet( set )
-      
+      newMonInRope  <- set.headOption match {
+                  case Some( monkey ) => 
+                        ECC.acrossMonkey( monkey )
+                        ( data.numMonkeysInRope + 1 ).pure
+                  case None =>  data.numMonkeysInRope.pure
+                }
+            
+      newSet <- set.headOption match {
+                  case _ : Some[Monkey] => set.tail.pure
+                  case None =>  Set[Monkey]().pure
+                }
+                
       newData <- newDirection match {
-        
-              case East => data.copy(
-                                      waitingEastToWest = newSet, 
-                                      numMonkeysInRope = data.numMonkeysInRope  + 1,
-                                      to = newDirection
-                                    ).pure
-              case West => data.copy( 
-                                      waitingWestToEast = newSet, 
-                                      numMonkeysInRope = data.numMonkeysInRope  + 1,
-                                      to = newDirection
-                                    ).pure 
-            } 
-      
-      
-    } yield ( true, newData ) 
-      
+              case East => data.copy( waitingEastToWest = newSet ).pure
+              case West => data.copy( waitingWestToEast = newSet ).pure 
+            }
+            
+    } yield ( 
+              newData.copy( 
+                             numMonkeysInRope = newMonInRope,
+                             to = newDirection
+                          )
+              
+            ) 
+    
   }
   
-  
-  private def newTo( data : Data ) : P[Region] = {
+  private def newTo[P[_]]( data : Data )( implicit E: MonadError[P,Error] )  : P[Region] = {
     
-    val waitingEastIsNotEmpty = data.waitingEastToWest.headOption.fold( false )( s => true  )
-    val waitingWestIsNotEmpty = data.waitingWestToEast.headOption.fold( false )( s => true  )
+    val waitingEastIsNotEmpty = data.waitingEastToWest.headOption.fold( false )( _ => true  )
+      
+    val waitingWestIsNotEmpty = data.waitingWestToEast.headOption.fold( false )( _ => true  )
     
-    
-    if ( waitingEastIsNotEmpty &&  waitingWestIsNotEmpty ) {
-                    
-      data.numMonkeysInRope match {
+    if ( isNotEmptySetsOfBothSides( data ) && data.numMonkeysInRope == 0 ) {
           
-          case 0 => data.to match {
-                      case East => (West : Region ).pure
-                      case West => (East : Region ).pure                 
+          data.to match {
+                      case East => ( West : Region ).pure
+                      case West => ( East : Region ).pure                 
                     }
-          case _ => ( BothListMonkeyWaitingNotEmpty : Error) raiseError
           
-       } 
-          
-    } else if ( waitingEastIsNotEmpty  ) {
-     (East : Region ).pure         
     } else {
-      (West : Region ).pure
+      
+       data.to.pure
     }
     
   }
   
   
-  private def sendMessageAndUpdateSet( set: Set[Monkey] ) : P[Set[Monkey]] = {
+  private def isNotEmptySetsOfBothSides( data: Data )  : Boolean = {
     
-    for {
+    val waitingEastIsNotEmpty = data.waitingEastToWest.headOption.fold( false )( _ => true  )
       
-      monkey <- set.headOption match {
-                  case Some( m ) => m.pure
-                  case None =>  ( ListMonkeyWaitingEmpty :Error ).raiseError
-                }
-                
-      _  <- sendMessageCanAcross( monkey )
-      
-    } yield ( set.tail )
+    val waitingWestIsNotEmpty = data.waitingWestToEast.headOption.fold( false )( _ => true  )
     
-  }
+    waitingEastIsNotEmpty && waitingWestIsNotEmpty
+    
+  } 
   
   
 }

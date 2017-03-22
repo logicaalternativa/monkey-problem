@@ -10,10 +10,6 @@ case object MonkeysInRopeMinusZero extends Error{
   override def description : String = "The number in the monkeys rope must not be minus zero"
 }
 
-case object ListMonkeyWaitingEmpty extends ValidationError{
-  override def description : String = "The waiting monkey list is empty "
-}
-
 case object BothListMonkeyWaitingNotEmpty extends ValidationError{
   override def description : String = "Both list wainting monkey is not empty"
 }

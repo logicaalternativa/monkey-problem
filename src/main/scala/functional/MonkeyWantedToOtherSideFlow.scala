@@ -1,6 +1,8 @@
 package com.logicaalternativa.monkeyproblem
 package functional
 
+import scala.concurrent.duration.Duration
+
 
 trait MonkeyWantedToOtherSideFlow [P[_]] {
   
