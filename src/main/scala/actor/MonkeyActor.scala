@@ -15,18 +15,20 @@ object MonkeyActor {
 
 class MonkeyActor( val ropeActor : ActorRef, from : Region ) extends Actor with ActorLogging {
   
+  import UtilLogSimulation._
+  import akka.event.{Logging}
+  
+  implicit val logSimulation = Logging( context system, UtilLogSimulation.nameLoger)
+  
  /**
   * */ 
   override def receive = {
       case InitMonkey => 
-        // Traza
-        println( s">>>>>> ropeActor $ropeActor" )
-        
-        // Fin de traza
         ropeActor ! WantToCross( from )
-      case CanCross => 
+      case CanCross =>
+        logCanCross( self.path.name, from )
         Thread.sleep( 4000 )
-        sender ! MonkeyArrived
+        sender ! MonkeyArrived( from)
         context stop ( self )
       case msg =>
         log.info( "Unknown message {}", msg )

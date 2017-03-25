@@ -3,8 +3,7 @@ package actor
 
 import akka.actor.{ActorLogging,Actor,Props,ActorRef}
 
-import functional.{Monkey}
-
+import functional._
 
 object RopeActor {
   
@@ -43,13 +42,16 @@ object RopeActor {
 
 class RopeActor extends Actor with ActorLogging {
   
-  import functional._
   import scala.util.Try
 
   import RopeActor.{EEither, EitherError}
   import functional.MonkeyArrivedFlow.monkeyArrived
   import functional.NewMonkeyInRopeFlow.next
   import functional.MonkeyWantedToOtherSideFlow.wantedOtherSide
+  import akka.event.{Logging}
+  import UtilLogSimulation._
+  
+  implicit val logSimulation = Logging( context system, UtilLogSimulation.nameLoger)
 
   implicit val E = RopeActor.EEither
 
@@ -75,14 +77,13 @@ class RopeActor extends Actor with ActorLogging {
   
   /**
    * */
-  def nextBehavior( stateEvents: StateEvents, data : Data ) : Receive =  {
+  def nextBehavior( stateEvents: StateEvents, data : Data ) : Receive =  {    
     
-    
-    case MonkeyArrived  =>
+    case MonkeyArrived( from )  =>
         log.info( "Received Event 'MonkeyArrived'")
         monkeyArrived[EitherError]( stateEvents, data ) match {
             case Right(( st, da ) ) => 
-              //~ log.info( "New data {}" , getLog( da ) )
+              logArrived( sender.path.name, from  )
               context become nextBehavior( st, da )
             case Left( e ) => log.error( "Error to NewMonkeyArrived event {}", e )
         }
@@ -91,13 +92,14 @@ class RopeActor extends Actor with ActorLogging {
         log.info( "Received Event 'CheckNewMonkeyInRope'" )
         next[EitherError]( data )  match {
             case Right(( st, da ) ) => 
-              log.info( "New data {}" , getLog( da ) )
+              logData( da )
               context become nextBehavior( st, da )
             case Left( e ) => log.error( "Error to CheckNewMonkeyInRope event {}", e )
         }
         
     case WantToCross( from ) => 
-        log.info( "Received Event 'WantToCross' from {} {}", from, getLogWantToCross( sender,from ) )
+        log.info( "Received Event 'WantToCross' from {}", from  )
+        logWantToCross( sender.path.name, from )
         wantedOtherSide[EitherError]( Monkey( sender.path.toStringWithoutAddress, from ),stateEvents, data  )  match {
             case Right(( st, da ) ) => context become nextBehavior( st, da )
               //~ log.info( "New data {}" , getLog( da ) )
@@ -110,71 +112,7 @@ class RopeActor extends Actor with ActorLogging {
     
   }
   
-  def getLog( data : Data ) = {
-    
-   
-    val mE = data.waitingEastToWest.foldLeft( 0 )( ( acc, s ) => acc + 1  )
-    val mW = data.waitingWestToEast.foldLeft( 0 )( ( acc, s ) => acc + 1  )
-    
-    val to = data.to match {
-        case East => s">> East ( ${data.numMonkeysInRope} ) >>" 
-        case West => s"<< West ( ${data.numMonkeysInRope} ) <<" 
-    }
-    
-    s"""
-    
-    ****************************************************
-      IN THE ROPE                                       
-      ===========                                       
-                                                 ($mW)    
-        O                                         O     
-       /|\\ |>---------------------------------<| /|\\    
-       / \\                                       / \\    
-       ($mE)                                              
-                   $to                                   
-    ****************************************************
-    """
-  }
   
-  def getLogWantToCross( sender : ActorRef, from : Region ) = {
-   
-    val name = sender.path.name
-    
-    if ( from == East ) {
-    
-      s"""
-    
-    ****************************************************
-      WANT TO CROSS                                    
-      =============                                    
-                         >> >>
-        O/                                             
-       /|  |>---------------------------------<|       
-       / \\                                            
-                                                       
-      This is $name. I want to cross to West           
-    ****************************************************
-    """
-    } else {
-      
-    s"""
-    
-    ****************************************************
-      IN THE ROPE                                       
-      ===========                                       
-                         << <<                      
-                                                \\O     
-          |>---------------------------------<|  |\\    
-                                                / \\    
-                                                                                                 
-                                                       
-            This is $name. I want to cross to East    
-    ****************************************************
-    """
-    
-    }
-    
-  }
   
   def sendMessageActorMonkeyCanCross( monkey : Monkey ) : EitherError[Unit] =  {
       

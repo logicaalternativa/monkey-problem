@@ -30,17 +30,19 @@ class SimulationActor( numMonkeys : Int ) extends Actor with ActorLogging {
     
     case CreateNewMonkey => 
     
-      sendMessageCreateMonkey( numM, rActor )
-      
       val newNum = numM - 1
       
       newNum match {
-        case 0 =>  context stop ( self )
-        case _ => context become nextBehavior( newNum , rActor )
+        case -1 =>         
+          log.info( "END of create monkeys")
+          context stop ( self )
+        case _ => 
+          sendMessageCreateMonkey( numM, rActor )
+          context become nextBehavior( newNum , rActor )
       }
       
     case msg => 
-      log.info( "Unknow message {}" , msg  )
+      log.info( "Unknown message {}" , msg  )
       unhandled( msg )
     
   }
@@ -50,15 +52,15 @@ class SimulationActor( numMonkeys : Int ) extends Actor with ActorLogging {
     import scala.concurrent.duration._
     import scala.util.Random.nextInt
    
-    val nextTime = nextInt( 9 ) + 1
+    //~ val nextTime = nextInt( 8 ) + 1
+    val nextTime = nextInt( 3 ) + 1
       
     val fromRegion = nextInt(2) match {
       case 0 => East
-      case _ => West 
-      
+      case _ => West      
     }
     
-    val monkeyActor = context.system.actorOf( MonkeyActor.props( rActor, fromRegion ), "monkey-" + (numMonkeys-numM) )
+    val monkeyActor = context.system.actorOf( MonkeyActor.props( rActor, fromRegion ), "monkey-" + (numMonkeys- numM + 1) )
     
     monkeyActor ! InitMonkey
     

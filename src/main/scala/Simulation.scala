@@ -12,6 +12,6 @@ object Simulation extends App {
   
   val simulationActor = system.actorOf( SimulationActor.props( numberMonkeys ), "simulation" )
   
-  simulationActor ! CreateNewMonkey   
+  simulationActor ! CreateNewMonkey
   
 }
