@@ -112,7 +112,7 @@ object UtilLogSimulation {
     
     }
     
-    logRope info ( "Monkey wants to cross {}" , logS )
+    logRope info ( "Monkey is arrived {}" , logS )
     
   }
   
@@ -154,10 +154,9 @@ object UtilLogSimulation {
     
     }
     
-    logRope info ( "Monkey wants to cross {}" , logS )
+    logRope info ( "Monkey has authorization  {}" , logS )
     
   }
-  
   
   
 }

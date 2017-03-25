@@ -8,24 +8,17 @@ import functional.{Monkey,East, West}
 
 object SimulationActor {
   
-  def props( numMonkeys : Int ) = Props( classOf[SimulationActor], numMonkeys )
+  def props( numMonkeys : Int, ropeActor : ActorRef ) = Props( classOf[SimulationActor], numMonkeys, ropeActor )
   
 }
 
 
-class SimulationActor( numMonkeys : Int ) extends Actor with ActorLogging {
+class SimulationActor( numMonkeys : Int, ropeActor : ActorRef ) extends Actor with ActorLogging {
   
- 
-  
- val ropeActor : ActorRef = context.system.actorOf ( RopeActor.props, "rope" )
-  
- 
- 
   override def receive = nextBehavior( numMonkeys, ropeActor )
-  
+ 
   /**
    * */
-  
   def nextBehavior( numM : Int, rActor : ActorRef ) : Receive =  {
     
     case CreateNewMonkey => 
@@ -35,7 +28,7 @@ class SimulationActor( numMonkeys : Int ) extends Actor with ActorLogging {
       newNum match {
         case -1 =>         
           log.info( "END of create monkeys")
-          context stop ( self )
+          context stop( self )
         case _ => 
           sendMessageCreateMonkey( numM, rActor )
           context become nextBehavior( newNum , rActor )
@@ -52,8 +45,7 @@ class SimulationActor( numMonkeys : Int ) extends Actor with ActorLogging {
     import scala.concurrent.duration._
     import scala.util.Random.nextInt
    
-    //~ val nextTime = nextInt( 8 ) + 1
-    val nextTime = nextInt( 3 ) + 1
+    val nextTime = nextInt( 8 ) + 1
       
     val fromRegion = nextInt(2) match {
       case 0 => East
