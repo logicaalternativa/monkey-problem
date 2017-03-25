@@ -76,20 +76,32 @@ object NewMonkeyInRopeFlow {
   
   private def newTo[P[_]]( data : Data )( implicit E: MonadError[P,Error] )  : P[Region] = {
     
-    val waitingEastIsNotEmpty = data.waitingEastToWest.headOption.fold( false )( _ => true  )
-      
-    val waitingWestIsNotEmpty = data.waitingWestToEast.headOption.fold( false )( _ => true  )
+    data.numMonkeysInRope  match {
+      case 0 => newToWhenThereAreNotMonkeysInRope( data )
+      case _ => data.to.pure
+    }
     
-    if ( isNotEmptySetsOfBothSides( data ) && data.numMonkeysInRope == 0 ) {
-          
-          data.to match {
-                      case East => ( West : Region ).pure
-                      case West => ( East : Region ).pure                 
-                    }
-          
+  }
+  
+  private def newToWhenThereAreNotMonkeysInRope[P[_]]( data : Data )( implicit E: MonadError[P,Error] )  : P[Region] = {
+    
+    val waitingEastIsNotEmpty = data.waitingEastToWest.headOption.fold( false )( _ => true  )
+    
+    if ( isNotEmptySetsOfBothSides( data ) ) {
+
+      data.to match {
+        case East =>  ( West : Region ).pure
+        case West => ( East : Region ).pure
+      }
+
+
+    } else if (waitingEastIsNotEmpty ) {
+
+      ( East : Region ).pure     
+       
     } else {
-      
-       data.to.pure
+
+      ( West : Region ).pure
     }
     
   }

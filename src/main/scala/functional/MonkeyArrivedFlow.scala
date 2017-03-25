@@ -2,17 +2,12 @@ package com.logicaalternativa.monkeyproblem
 package functional
 
 
-import scala.util.Try
-
-
-trait MonkeyArrivedFlow [P[_]] {
+object MonkeyArrivedFlow {
   
   import scalaz.MonadError
   import scalaz.syntax.monadError._
   
-  implicit val E: MonadError[P,Error]
-  
-  def monkeyArrived( data : Data ) : P[Data] = {
+  def monkeyArrived [P[_]] ( stateEvents: StateEvents, data : Data )( implicit ENM : ExecuteEventNewMonkeyInRope[P], E: MonadError[P,Error] ): P[ (StateEvents,Data) ]= {
     
     for {
       
@@ -23,7 +18,14 @@ trait MonkeyArrivedFlow [P[_]] {
       
       newData       <- data.copy( numMonkeysInRope = newNumMonkeys ).pure
       
-    } yield newData
+      event <- stateEvents match {
+        
+                  case StateEvents( NotSent ) => ENM.execEventNewMonkeyInRope
+                  case StateEvents( e )  => e.pure
+        
+                }
+      
+    } yield (StateEvents( event ), newData )
     
   }
   

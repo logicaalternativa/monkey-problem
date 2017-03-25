@@ -326,4 +326,37 @@ class NewMonkeyInRopeFlowSpec extends FlatSpec with Matchers with GivenWhenThen 
   }
   
   
+  "9.-" should  " " in {
+          
+     Given("a flow and data with monkeys waiting west side and any in the east side")
+    
+     val firstMonkey = Monkey( "1", East )   
+     val secondMonkey = Monkey( "2", East )   
+     implicit val executeEvCanAcrossTry = new ExecuteEventCanAcrossMonkeyImpTry( firstMonkey )
+    
+     val setEmpty = Set[Monkey]()
+     val to = West
+     val numMonkeysInRope = 0
+     
+     val data = Data( Set[Monkey]( firstMonkey, secondMonkey) , setEmpty , to, numMonkeysInRope )   
+     
+     When("it is called to next")
+     val newData  =  NewMonkeyInRopeFlow.next[Try]( data )
+     
+     Then( "it should remove the first monkey waiting to cross from east to west" )      
+     newData match {
+        case Success( ( StateEvents(eventInRope), Data( mew, mwe, t, n) ) ) => 
+          eventInRope should be (AlreadySentDelay)
+          mew.head should be ( secondMonkey )
+          mwe should be ( setEmpty )
+          t should be ( East )
+          n should be ( numMonkeysInRope + 1 )
+        case Failure( e ) => 
+          fail( s"It must not be a error : ${e.getMessage}" )
+     
+    }
+    
+  }
+  
+  
 }

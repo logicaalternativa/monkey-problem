@@ -17,7 +17,8 @@ case class Monkey(id : String, in : Region)
 case class Data( 
                  waitingEastToWest : Set[Monkey], 
                  waitingWestToEast : Set[Monkey], 
-                 to : Region, numMonkeysInRope : Int ) {
+                 to : Region, 
+                 numMonkeysInRope : Int ) {
   
   def isEmpty : Boolean = {
       
