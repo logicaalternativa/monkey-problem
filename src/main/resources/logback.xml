@@ -44,13 +44,11 @@
   
   <logger name="UtilLogSimulation(akka://monkey-problem)">
     <appender-ref ref="LOG_SIMULATION" />
+    <appender-ref ref="consoleAppender" />
   </logger>
   
   <root level="info">
     <appender-ref ref="LOG_FILE" />
-    <appender-ref ref="consoleAppender" />
   </root>
-  
-  
 
 </configuration>

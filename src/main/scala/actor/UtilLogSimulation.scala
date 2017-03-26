@@ -91,7 +91,7 @@ object UtilLogSimulation {
         |  |>---------------------------------<|      
        / \\                                           
                                                       
-      This is $name. Ey!! I arrived to the West          
+      This is $name. Ey!! I arrived to East          
     ****************************************************
     """
     } else {
@@ -106,7 +106,7 @@ object UtilLogSimulation {
           |>---------------------------------<|  |  
                                                 / \\ 
                                                 
-      This is $name. Ey!! I arrived to the East           
+      This is $name. Ey!! I arrived to West           
     ****************************************************
     """
     

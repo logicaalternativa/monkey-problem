@@ -9,6 +9,9 @@ object RopeActor {
   
   import scalaz.MonadError
   import scala.util.{Either,Right,Left}
+  import scala.concurrent.duration._
+  
+  val durationDelayMsgCheckStateEvent = 1 seconds
   
   type EitherError[T] = Either[Error, T]
   
@@ -139,11 +142,11 @@ class RopeActor extends Actor with ActorLogging {
    * */
   def sendMessageCheckStateEventDelay : EitherError[EventNewMonkeyInRope] = {
     
-    import scala.concurrent.duration._
+    import RopeActor.durationDelayMsgCheckStateEvent
     
     implicit val ec = context.dispatcher
   
-    context.system.scheduler.scheduleOnce(1 seconds, self, CheckNewMonkeyInRope)
+    context.system.scheduler.scheduleOnce( durationDelayMsgCheckStateEvent, self, CheckNewMonkeyInRope)
     
     Right( AlreadySentDelay )
     

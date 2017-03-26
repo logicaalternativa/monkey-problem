@@ -8,6 +8,8 @@ import functional.{Monkey,East, West}
 
 object SimulationActor {
   
+  val numMaxSecondsCreateNewMonkey = 8
+  
   def props( numMonkeys : Int, ropeActor : ActorRef ) = Props( classOf[SimulationActor], numMonkeys, ropeActor )
   
 }
@@ -44,17 +46,22 @@ class SimulationActor( numMonkeys : Int, ropeActor : ActorRef ) extends Actor wi
     
     import scala.concurrent.duration._
     import scala.util.Random.nextInt
+    import SimulationActor.numMaxSecondsCreateNewMonkey
    
-    val nextTime = nextInt( 8 ) + 1
+    val nextTime = nextInt( numMaxSecondsCreateNewMonkey ) + 1
       
     val fromRegion = nextInt(2) match {
       case 0 => East
       case _ => West      
     }
     
-    val monkeyActor = context.system.actorOf( MonkeyActor.props( rActor, fromRegion ), "monkey-" + (numMonkeys- numM + 1) )
+    val nameMonkey = "monkey-" + (numMonkeys- numM + 1)
+    
+    val monkeyActor = context.system.actorOf( MonkeyActor.props( rActor, fromRegion ), s"monkey-$nameMonkey" )
     
     monkeyActor ! InitMonkey
+    
+    log.info( "It is created and initialized {}" , nameMonkey )
     
     log.info( "Next time for create a new Monkey: {} seconds" , nextTime )
     
