@@ -28,7 +28,7 @@ class MonkeyActor( val ropeActor : ActorRef, from : Region ) extends Actor with 
       case CanCross =>
         logCanCross( self.path.name, from )
         Thread.sleep( 4000 )
-        sender ! MonkeyArrived( from)
+        sender ! MonkeyArrived( from )
         context stop ( self )
       case msg =>
         log.info( "Unknown message {}", msg )

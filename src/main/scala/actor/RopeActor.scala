@@ -106,7 +106,7 @@ class RopeActor extends Actor with ActorLogging {
         wantedOtherSide[EitherError]( Monkey( sender.path.toStringWithoutAddress, from ),stateEvents, data  )  match {
             case Right(( st, da ) ) => context become nextBehavior( st, da )
               //~ log.info( "New data {}" , getLog( da ) )
-              context become nextBehavior( stateEvents, da )
+              //~ context become nextBehavior( stateEvents, da )
             case Left( e ) => log.error( "Error to WantToCross event {}", e )
         }
     case msg => 
