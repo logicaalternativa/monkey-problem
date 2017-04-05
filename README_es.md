@@ -29,17 +29,52 @@ Directorio `functional`
 Contiene toda lógica cuando un mono llega al destino después de pasar
 la cuerda
 
+    ****************************************************
+      WANT TO CROSS                                   
+      =============                                   
+                         >> >>                        
+        O/                                            
+       /|  |>---------------------------------<|      
+       / \                                           
+                                                      
+      This is monkey-monkey-1. I want to cross to West          
+    ****************************************************
+
 **Clase de test**: `MonkeyWantedToOtherSideFlow.scala`
 
 #### MonkeyArrivedFlow.scala 
-Contiene la lógica cuando un mono quiere pasar al otro lado
+Contiene la lógica cuando un mono llega al otro lado
+    
+    ****************************************************
+      MONKEY ARRIVED                                   
+      ============== 
+                    
+                                                \O/   
+          |>---------------------------------<|  |  
+                                                / \ 
+                                                
+      This is monkey-monkey-1. Ey!! I arrived to West           
+    ****************************************************
 
 **Clase de test**: `MonkeyWantedToOtherSideFlowSpec.scala`
 
 #### NewMonkeyInRopeFlow.scala
 Contiene la lógica que comprueba si se debe dar permiso a un mono para
 pasar la cuerda dependiendo de que si ya hay monos en la cuerda y si 
-están o no esperando a uno y al otro lado
+están o no esperando a uno y al otro lado 
+    
+    ****************************************************
+      IN THE ROPE                                       
+      ===========                                       
+                                                 (0)  
+        O                                         O     
+       /|\ |>---------------------------------<| /|\  
+       / \                                       / \  
+       (0)                                            
+                   >> East ( 1 ) >>                                  
+    ****************************************************
+
+
 
 **Clase de test**: `NewMonkeyInRopeFlowSpec.scala`
 
@@ -56,6 +91,20 @@ Es el actor que modela la cuerda en el problema
 
 ### MonkeyActor.scala
 Es el actor que modela un mono en el problema
+
+  
+    
+    ****************************************************
+      CAN CROSS                               
+      =========                                   
+                         >> >>                        
+               _O_                                         
+           |>-' | '--------------------------------<|      
+               / \                                        
+                                                      
+     This is monkey-monkey-1. I have authorization to cross to West          
+    ****************************************************
+
 
 ### SimulationActor.scala
 Es el actor crea la simulación creando los diferentes monos de manera
